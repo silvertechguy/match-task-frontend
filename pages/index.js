@@ -1,65 +1,87 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { useState } from 'react';
+import MatchesTable from '../components/MatchesTable/MatchesTable';
+import Layout from '../components/Layout/Layout';
+import SearchInput from '../components/SearchInput/SearchInput';
+import styles from '../styles/Home.module.css';
+import AddMatch from '../components/add-match/add-match';
 
-export default function Home() {
+export default function Home(props) {
+  const [matches, setMatches] = useState(props.matches);
+
+  const [keyword, setKeyword] = useState('');
+  const filteredMatches = matches.filter(
+    match =>
+      match.teamAName.toLowerCase().includes(keyword) ||
+      match.teamBName.toLowerCase().includes(keyword) ||
+      match.teamAHome.toLowerCase().includes(keyword) ||
+      match.teamBHome.toLowerCase().includes(keyword) ||
+      match.leauge.toLowerCase().includes(keyword)
+  );
+
+  const onInputChange = e => {
+    e.preventDefault();
+
+    setKeyword(e.target.value.toLowerCase());
+  };
+
+  const addNewMatch = match => {
+    fetch(`http://localhost:4000/api/matches`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(match),
+    })
+      .then(res => res.json())
+      .then(matchData => {
+        setMatches(pre => [...pre, matchData]);
+      });
+  };
+
+  const deleteMatch = matchId => {
+    const filteredMatches = matches.filter(match => match._id !== matchId);
+    setMatches(filteredMatches);
+    fetch(`http://localhost:4000/api/matches/${matchId}`, {
+      method: 'DELETE',
+    });
+  };
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+    <Layout>
+      <div className={styles.inputContainer}>
+        <div className={styles.counts}>
+          Found {filteredMatches.length} matches
         </div>
-      </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+        <div className={styles.input}>
+          <SearchInput onChange={onInputChange} />
+        </div>
+
+        <div className={styles.add_match}>
+          {/* <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setOpenDialog(pre => ({ ...pre, open: true }))}
+          >
+            Add Match
+          </Button> */}
+          <AddMatch addNewMatch={addNewMatch} />
+        </div>
+      </div>
+      <MatchesTable matches={filteredMatches} deleteMatch={deleteMatch} />
+    </Layout>
+  );
 }
+
+// Get all the data at build time so later on when we visit the page all the data will be available for us we don't to wait for any call to be resolve
+// Remember: This is static it means that it will only be updated when we build the project
+export const getStaticProps = async () => {
+  const res = await fetch('http://localhost:4000/api/matches');
+  const { matches } = await res.json();
+
+  return {
+    props: {
+      matches,
+    },
+  };
+};

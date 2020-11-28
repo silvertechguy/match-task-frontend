@@ -74,9 +74,7 @@ export default function Home(props) {
   );
 }
 
-// Get all the data at build time so later on when we visit the page all the data will be available for us we don't to wait for any call to be resolve
-// Remember: This is static it means that it will only be updated when we build the project
-export const getStaticProps = async () => {
+export const getServerSideProps = async () => {
   const res = await fetch(API_URL);
   const { matches } = await res.json();
 

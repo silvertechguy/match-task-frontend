@@ -1,5 +1,6 @@
 import Layout from '../../components/Layout/Layout';
 import styles from './Match.module.css';
+import { API_URL } from '../../constants/API';
 
 const Match = ({ match }) => {
   return (
@@ -112,7 +113,7 @@ const Match = ({ match }) => {
 export default Match;
 
 export const getStaticProps = async ({ params }) => {
-  const res = await fetch(`http://localhost:4000/api/matches/${params.id}`);
+  const res = await fetch(`${API_URL}/${params.id}`);
   const match = await res.json();
 
   return {
@@ -123,7 +124,7 @@ export const getStaticProps = async ({ params }) => {
 };
 
 export const getStaticPaths = async () => {
-  const res = await fetch('http://localhost:4000/api/matches');
+  const res = await fetch(API_URL);
   const { matches } = await res.json();
 
   const paths = matches.map(match => ({

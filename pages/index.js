@@ -4,6 +4,7 @@ import Layout from '../components/Layout/Layout';
 import SearchInput from '../components/SearchInput/SearchInput';
 import styles from '../styles/Home.module.css';
 import AddMatch from '../components/add-match/add-match';
+import { API_URL } from '../constants/API';
 
 export default function Home(props) {
   const [matches, setMatches] = useState(props.matches);
@@ -25,7 +26,7 @@ export default function Home(props) {
   };
 
   const addNewMatch = match => {
-    fetch(`http://localhost:4000/api/matches`, {
+    fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -41,7 +42,7 @@ export default function Home(props) {
   const deleteMatch = matchId => {
     const filteredMatches = matches.filter(match => match._id !== matchId);
     setMatches(filteredMatches);
-    fetch(`http://localhost:4000/api/matches/${matchId}`, {
+    fetch(`${API_URL}/${matchId}`, {
       method: 'DELETE',
     });
   };
@@ -76,7 +77,7 @@ export default function Home(props) {
 // Get all the data at build time so later on when we visit the page all the data will be available for us we don't to wait for any call to be resolve
 // Remember: This is static it means that it will only be updated when we build the project
 export const getStaticProps = async () => {
-  const res = await fetch('http://localhost:4000/api/matches');
+  const res = await fetch(API_URL);
   const { matches } = await res.json();
 
   return {

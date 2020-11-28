@@ -7,6 +7,7 @@ import {
 import { IconButton, Switch } from '@material-ui/core';
 import { useState } from 'react';
 import styles from './MatchesTable.module.css';
+import { API_URL } from '../../constants/API';
 
 const orderBy = (matches, value, direction) => {
   if (direction === 'asc') {
@@ -47,7 +48,7 @@ const MatchesTable = ({ matches, deleteMatch }) => {
   const handleChange = event => {
     const matchId = event.target.value;
 
-    fetch(`http://localhost:4000/api/matches/${matchId}`, {
+    fetch(`${API_URL}/${matchId}`, {
       method: 'PUT',
       body: {},
     });
